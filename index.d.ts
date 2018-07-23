@@ -7,7 +7,8 @@ declare module "node-libuiohook" {
         interface INodeLibuiohookBinding {
             callback?: () => void;
             eventType: TKeyEventType;
-            key: string; // Is key code
+            key?: string; // Is key code
+            keyCode?: number; // Is key code
             modifiers?: {
                 alt: boolean;
                 ctrl: boolean;
