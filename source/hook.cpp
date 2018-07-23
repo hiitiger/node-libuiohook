@@ -217,6 +217,26 @@ void StopHotkeyThreadJS(const v8::FunctionCallbackInfo<v8::Value>& args) {
 	return;
 }
 
+std::vector<std::pair<key_t, bool>> ToKeysVector(key_t keyCode, v8::Local<v8::Object> modifiers) {
+    std::vector<std::pair<key_t, bool>> keys;
+
+    bool modShift, modCtrl, modMenu, modMeta;
+    modShift = modifiers->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "shift"))->ToBoolean()->BooleanValue();
+    modCtrl = modifiers->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "ctrl"))->ToBoolean()->BooleanValue();
+    modMenu = modifiers->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "alt"))->ToBoolean()->BooleanValue();
+    modMeta = modifiers->Get(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), "meta"))->ToBoolean()->BooleanValue();
+
+
+    keys.push_back(std::make_pair(VK_SHIFT, modShift));
+    keys.push_back(std::make_pair(VK_CONTROL, modCtrl));
+    keys.push_back(std::make_pair(VK_MENU, modMenu));
+    keys.push_back(std::make_pair(VK_LWIN, modMeta));
+
+    keys.push_back(std::make_pair(keyCode, true));
+
+return std::move(keys);
+}
+
 std::vector<std::pair<key_t, bool>> StringToKeys(std::string keystr, v8::Local<v8::Object> modifiers) {
 	static std::map<std::string, key_t> g_KeyMap = {
 	#ifdef _WIN32
@@ -413,11 +433,19 @@ void RegisterHotkeyJS(const v8::FunctionCallbackInfo<v8::Value>& args) {
 	 * }
 	 */
 
-	v8::Local<v8::Object> binds = args[0]->ToObject();
-	std::vector<std::pair<key_t, bool>> keys = StringToKeys(
-		std::string(*v8::String::Utf8Value(binds->Get(v8::String::NewFromUtf8(args.GetIsolate(), "key")))),
-		binds->Get(v8::String::NewFromUtf8(args.GetIsolate(), "modifiers"))->ToObject()
-	);
+    v8::Local<v8::Object> binds = args[0]->ToObject();
+    std::vector<std::pair<key_t, bool>> keys;
+    if (binds->Has(v8::String::NewFromUtf8(args.GetIsolate(), "key"))) {
+        keys = StringToKeys(
+            std::string(*v8::String::Utf8Value(binds->Get(v8::String::NewFromUtf8(args.GetIsolate(), "key")))),
+            binds->Get(v8::String::NewFromUtf8(args.GetIsolate(), "modifiers"))->ToObject()
+        );
+    }
+    else {
+        v8::Local<v8::Value> value = binds->Get(v8::String::NewFromUtf8(args.GetIsolate(), "keyCode"));
+        keys = ToKeysVector(static_cast<key_t>(value->Int32Value()), binds->Get(v8::String::NewFromUtf8(args.GetIsolate(), "modifiers"))->ToObject());
+    }
+
 	std::string eventString = std::string(*v8::String::Utf8Value(binds->Get(v8::String::NewFromUtf8(args.GetIsolate(),
 		"eventType"))));
 
@@ -505,7 +533,7 @@ void UnregisterHotkeyJS(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		}
 	} else if (eventString == "registerKeyup") {
 		if (hk->second.cbUp) {
-			hk->second.cbDown = nullptr;
+			hk->second.cbUp = nullptr;
 		} else {
 			args.GetReturnValue().Set(false);
 			return;

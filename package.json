@@ -4,21 +4,15 @@
   "description": "",
   "private": true,
   "authors": [],
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:twitchalerts/node-libuiohook.git"
-  },
   "licenses": [],
   "main": "index.js",
   "scripts": {
-    "configure": "cmake-js configure",
-    "install": "cmake-js compile"
+    "build": "node-gyp build",
+    "compile": "node-gyp rebuild"
   },
   "devDependencies": {
     "nodeunit": "^0.10.2",
-    "nan": "^2.6.2"
-  },
-  "dependencies": {
-    "cmake-js": "^3.4.1"
+    "nan": "^2.10.0",
+    "node-gyp": "^3.7.0"
   }
 }

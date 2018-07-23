@@ -1,4 +1,3 @@
-var uiohookModule = require('./build/distribute/node-libuiohook/node-libuiohook');
+var uiohookModule = require('./build/Release/node-libuiohook');
 
 module.exports = uiohookModule;
-
