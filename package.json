@@ -1,6 +1,6 @@
 {
   "name": "node-libuiohook",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "",
   "private": true,
   "authors": [],
@@ -10,9 +10,11 @@
     "build": "node-gyp build",
     "compile": "node-gyp rebuild"
   },
-  "devDependencies": {
-    "nodeunit": "^0.10.2",
+  "dependencies": {
     "nan": "^2.10.0",
     "node-gyp": "^3.7.0"
+  },
+  "devDependencies": {
+    "nodeunit": "^0.10.2"
   }
 }
